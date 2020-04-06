@@ -1,0 +1,10 @@
+htd_mc:
+  ip_address: 192.168.XXX.XXX
+  port: 10006 # optional 
+  zones: # optional, 
+   - Kitchen
+   - Dining Room
+   - Living Room
+  sources: # optional, 
+   - Chrome Cast
+   - FM/AM
