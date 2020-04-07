@@ -56,8 +56,12 @@ class HtdDevice(MediaPlayerDevice):
         return SUPPORT_HTD_MC
 
     @property
-    def entity_id(self):
-        return "media_player.zone_" + str(self.zone)
+    def unique_id(self):
+        return f"media_player.htd_mc_zone_{self.zone}"
+
+    # @property
+    # def entity_id(self):
+    #     return f"media_player.htd_mc_zone_{self.zone}"
 
     @property
     def name(self):
@@ -106,3 +110,7 @@ class HtdDevice(MediaPlayerDevice):
     def select_source(self, source):
         index = self.sources.index(source)
         self.client.set_source(self.zone, index + 1)
+
+    @property
+    def icon(self):
+        return "mdi:disc-player"
