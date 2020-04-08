@@ -28,23 +28,26 @@ SUPPORT_HTD_MC = (
 )
 
 def setup_platform(hass, config, add_entities, discovery_info=None):
-    htd_config = hass.data[DOMAIN]
-    zones = htd_config["zones"]
-    host = htd_config["host"]
-    port = htd_config["port"]
-    sources = htd_config["sources"]
-
+    htd_configs = hass.data[DOMAIN]
     entities = []
-     
-    for i in range(len(zones)):
-        entities.append(HtdDevice(host, port, sources, i + 1, zones[i]))
+    
+    for k in range(len(htd_configs)):
+        config = htd_configs[k]
+        zones = config["zones"]
+        host = config["host"]
+        port = config["port"]
+        sources = config["sources"]
+        
+        for i in range(len(zones)):
+            entities.append(HtdDevice(k, host, port, sources, i + 1, zones[i]))
 
     add_entities(entities)
 
 
 class HtdDevice(MediaPlayerDevice):
-    def __init__(self, host, port,  sources, zone, zone_name ):
+    def __init__(self, id, host, port,  sources, zone, zone_name ):
         self.zone = zone
+        self.id = id
         self.zone_name = zone_name
         self.sources = sources
         self.client = HtdMcClient(host, port)
@@ -57,11 +60,7 @@ class HtdDevice(MediaPlayerDevice):
 
     @property
     def unique_id(self):
-        return f"media_player.htd_mc_zone_{self.zone}"
-
-    # @property
-    # def entity_id(self):
-    #     return f"media_player.htd_mc_zone_{self.zone}"
+        return f"media_player.htd_mc_zone_{self.id}_{self.zone}"
 
     @property
     def name(self):
