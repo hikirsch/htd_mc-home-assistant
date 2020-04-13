@@ -1,36 +1,38 @@
-
-from __future__ import absolute_import, division, print_function
 import socket
 import time, logging
 
 MAX_HTD_VOLUME = 60
 DEFAULT_HTD_MC_PORT = 10006
 
+_LOGGER = logging.getLogger(__name__)
+
+def to_correct_string(message):
+    string = ""
+    for i in range(len(message)):
+        string += hex(message[i]) + ","
+    return string[:-1]
+
 class HtdMcClient:
     def __init__(self, ip_address, port=DEFAULT_HTD_MC_PORT):
         self.ip_address = ip_address
         self.port = port
-        self.zonelist = {
-            k + 1: {
-                # 'name': self.zone_names[k],
+        self.zones = {
+            k: {
+                'zone': k,
                 'power': None,
                 'input': None,
                 'vol': None,
                 'mute': None,
                 'source': None,
-            } for k in range(6)
+            } for k in range(1, 7)
         }
 
-    def checksum(self, message):
-        cs = 0
-        for b in message:
-            cs = cs + b
-        csb = cs & 0xff
-        return csb
-
-    def parse_reply(self, message, zone_number):
+    def parse(self, cmd, message, zone_number):
         if len(message) > 14:
-            zone_List = list()
+            zones = list()
+            # each chunk represents a different zone that should be 14 bytes long,
+            # query_all should work for each zone but doesn't, so we only take the first chunk
+
             # zone0 = message[0:14]
             zone1 = message[14:28]
             zone2 = message[28:42]
@@ -38,38 +40,55 @@ class HtdMcClient:
             zone4 = message[56:70]
             zone5 = message[70:84]
             zone6 = message[84:98]
-            zone_List.append(zone1)
-            zone_List.append(zone2)
-            zone_List.append(zone3)
-            zone_List.append(zone4)
-            zone_List.append(zone5)
-            zone_List.append(zone6)
-            for i in zone_List:
-                if len(i) == 0:
-                    continue
 
-                zone = i[2]
-                self.zonelist[zone]['power'] = "on" if (i[4] & 1 << 7) >> 7 else "off"
-                self.zonelist[zone]['source'] = i[8] + 1
-                self.zonelist[zone]['vol'] = i[9] - 196 if i[9] else 0
-                self.zonelist[zone]['mute'] = "on" if (i[4] & 1 << 6) >> 6 else "off"
- 
-        if len(message) == 14:
-            zone = message[2]
-            self.zonelist[zone]['power'] = "on" if (message[4] & 1 << 7) >> 7 else "off"
-            self.zonelist[zone]['source'] = message[8] + 1
-            self.zonelist[zone]['vol'] = message[9] - 196 if message[9] else 0
-            self.zonelist[zone]['mute'] = "on" if (message[4] & 1 << 6) >> 6 else "off"
+            # again, in a real working world situation, each zone would be correctly populated but we only ever work with 1 and whatever we get back.
+            zones.append(zone1)
+            zones.append(zone2)
+            zones.append(zone3)
+            zones.append(zone4)
+            zones.append(zone5)
+            zones.append(zone6)
+            
+            # go through each zone
+            for i in zones:
+                success = self.parse_message(cmd, i, zone_number) or success
 
-        return self.zonelist[zone_number]
+            if not success:
+                _LOGGER.warning(f"Update for Zone #{zone_number} failed.")
+
+        elif len(message) == 14:
+            self.parse_message(cmd, message, zone_number)
+
+        return self.zones[zone_number]
+    
+    def parse_message(self, cmd, message, zone_number):
+        if len(message) != 14:
+            return False
+
+        zone = message[2]
+
+        # it seems that even though we send one zone we may not get what we want
+        if zone in range(1,7):
+            self.zones[zone]['power'] = "on" if (message[4] & 1 << 7) >> 7 else "off"
+            self.zones[zone]['source'] = message[8] + 1
+            self.zones[zone]['vol'] = message[9] - 196 if message[9] else 0
+            self.zones[zone]['mute'] = "on" if (message[4] & 1 << 6) >> 6 else "off"
+            
+            _LOGGER.debug(f"Command for Zone #{zone} retrieved --> Cmd = {to_correct_string(cmd)} | Message = {to_correct_string(message)}")
+        
+            return True
+        else:
+            _LOGGER.warning(f"Sent command for Zone #{zone_number} but got #{zone} --> Cmd = {to_correct_string(cmd)} | Message = {to_correct_string(message)}")
+
+        return False
 
     def set_source(self, zone, input):
         if zone not in range(1, 7):
-            logging.warning("Invalid Zone")
+            _LOGGER.warning("Invalid Zone")
             return
 
         if input not in range(1, 7):
-            logging.warning("invalid input number")
+            _LOGGER.warning("invalid input number")
             return
 
         cmd = bytearray([0x02, 0x00, zone, 0x04, input + 2])
@@ -78,7 +97,7 @@ class HtdMcClient:
 
     def volume_up(self, zone):
         if zone not in range(1, 7):
-            logging.warning("Invalid Zone")
+            _LOGGER.warning("Invalid Zone")
             return
 
         cmd = bytearray([0x02, 0x00, zone, 0x04, 0x09])
@@ -86,7 +105,7 @@ class HtdMcClient:
 
     def volume_down(self, zone):
         if zone not in range(1, 7):
-            logging.warning("Invalid Zone")
+            _LOGGER.warning("Invalid Zone")
             return
 
         cmd = bytearray([0x02, 0x00, zone, 0x04, 0x0A])
@@ -94,7 +113,7 @@ class HtdMcClient:
 
     def set_volume(self, zone, vol):
         if vol not in range(0, MAX_HTD_VOLUME):
-            logging.warning("Invald Volume")
+            _LOGGER.warning("Invald Volume")
             return
 
         zone_info = self.query_zone(zone)
@@ -115,7 +134,7 @@ class HtdMcClient:
 
     def toggle_mute(self, zone):
         if zone not in range(1, 7):
-            logging.warning("Invalid Zone")
+            _LOGGER.warning("Invalid Zone")
             return
 
         cmd = bytearray([0x02, 0x00, zone, 0x04, 0x22])
@@ -123,7 +142,7 @@ class HtdMcClient:
 
     def query_zone(self, zone):
         if zone not in range(1, 7):
-            logging.warning("Invalid Zone")
+            _LOGGER.warning("Invalid Zone")
             return
 
         cmd = bytearray([0x02, 0x00, zone, 0x06, 0x00])
@@ -131,11 +150,11 @@ class HtdMcClient:
 
     def set_power(self, zone, pwr):
         if zone not in range(0, 7):
-            logging.warning("Invalid Zone")
+            _LOGGER.warning("Invalid Zone")
             return
 
         if pwr not in [0, 1]:
-            logging.warning("invalid power command")
+            _LOGGER.warning("invalid power command")
             return
 
         if zone == 0:
@@ -149,8 +168,15 @@ class HtdMcClient:
         cmd.append(self.checksum(cmd))
         mySocket = socket.socket()
         mySocket.connect((self.ip_address, self.port))
-        # print(cmd)
         mySocket.send(cmd)
         data = mySocket.recv(1024)
         mySocket.close()
-        return self.parse_reply(data, zone)
+
+        return self.parse(cmd, data, zone)
+
+    def checksum(self, message):
+        cs = 0
+        for b in message:
+            cs += b
+        csb = cs & 0xff
+        return cs

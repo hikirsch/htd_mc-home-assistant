@@ -34,24 +34,22 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     for k in range(len(htd_configs)):
         config = htd_configs[k]
         zones = config["zones"]
-        host = config["host"]
-        port = config["port"]
+        client = config["client"]
         sources = config["sources"]
         
         for i in range(len(zones)):
-            entities.append(HtdDevice(k, host, port, sources, i + 1, zones[i]))
+            entities.append(HtdDevice(k, client, sources, i + 1, zones[i]))
 
     add_entities(entities)
 
 
 class HtdDevice(MediaPlayerDevice):
-    def __init__(self, id, host, port,  sources, zone, zone_name ):
+    def __init__(self, id, client,  sources, zone, zone_name ):
         self.zone = zone
         self.id = id
         self.zone_name = zone_name
         self.sources = sources
-        self.client = HtdMcClient(host, port)
-
+        self.client = client
         self.update()
 
     @property

@@ -7,7 +7,7 @@ from homeassistant.const import CONF_HOST, CONF_PORT, CONF_PASSWORD, CONF_USERNA
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import ConfigType, Dict
 
-from .htd_mc import DEFAULT_HTD_MC_PORT
+from .htd_mc import DEFAULT_HTD_MC_PORT, HtdMcClient
 
 DOMAIN = "htd_mc"
 
@@ -60,9 +60,8 @@ def setup(hass: HomeAssistant, config: ConfigType):
         
         configs.append({ 
             "zones": zones, 
-            "host": host, 
-            "port": port,
-            "sources": sources
+            "sources": sources,
+            "client": HtdMcClient(host, port),
         })
 
     hass.data[DOMAIN] = configs
