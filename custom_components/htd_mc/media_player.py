@@ -1,5 +1,5 @@
 """Support for HTD MC Series"""
-from homeassistant.components.media_player import PLATFORM_SCHEMA, MediaPlayerDevice
+from homeassistant.components.media_player import PLATFORM_SCHEMA, MediaPlayerEntity
 from homeassistant.components.media_player.const import (
     SUPPORT_SELECT_SOURCE,
     SUPPORT_TURN_OFF,
@@ -13,6 +13,7 @@ from homeassistant.const import (
     CONF_NAME,
     STATE_OFF,
     STATE_ON,
+    STATE_UNKNOWN,
 )
 
 from . import DOMAIN, CONF_ZONES
@@ -27,24 +28,25 @@ SUPPORT_HTD_MC = (
     | SUPPORT_VOLUME_STEP
 )
 
+
 def setup_platform(hass, config, add_entities, discovery_info=None):
     htd_configs = hass.data[DOMAIN]
     entities = []
-    
+
     for k in range(len(htd_configs)):
         config = htd_configs[k]
         zones = config["zones"]
         client = config["client"]
         sources = config["sources"]
-        
+
         for i in range(len(zones)):
             entities.append(HtdDevice(k, client, sources, i + 1, zones[i]))
 
     add_entities(entities)
 
 
-class HtdDevice(MediaPlayerDevice):
-    def __init__(self, id, client,  sources, zone, zone_name ):
+class HtdDevice(MediaPlayerEntity):
+    def __init__(self, id, client,  sources, zone, zone_name):
         self.zone = zone
         self.id = id
         self.zone_name = zone_name
@@ -69,6 +71,9 @@ class HtdDevice(MediaPlayerDevice):
 
     @property
     def state(self):
+        if self.zone_info['power'] == 'unknown':
+            return STATE_UNKNOWN
+
         return STATE_ON if self.zone_info['power'] == 'on' else STATE_OFF
 
     def turn_on(self):
