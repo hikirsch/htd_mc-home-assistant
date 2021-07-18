@@ -26,6 +26,7 @@ This integration will add the HTD MCA66 into Home Assistant.
 - April 6, 2020 - Initial release
 - April 7, 2020 - Changed Icon and added unique_id (allows editing name and entity ID in Home Assistant UI)
 - April 8, 2020 - Support multiple MCAs
+- July 18, 2021 - Add version in manifest.json to support 2021.6+
 
 
 ## Code Credits
