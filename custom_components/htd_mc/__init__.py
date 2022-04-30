@@ -5,7 +5,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, discovery
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_PASSWORD, CONF_USERNAME
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.typing import ConfigType, Dict
+from homeassistant.helpers.typing import ConfigType
 
 from .htd_mc import DEFAULT_HTD_MC_PORT, HtdMcClient
 
@@ -46,7 +46,7 @@ def setup(hass: HomeAssistant, config: ConfigType):
 
         if zones is None:
             zones = []
-        
+
         if sources is None:
             sources = []
 
@@ -57,9 +57,9 @@ def setup(hass: HomeAssistant, config: ConfigType):
         # the device has 6 sources, so we default to Source X
         for i in range(len(sources), 6):
             sources.append("Source " + str(i + 1))
-        
-        configs.append({ 
-            "zones": zones, 
+
+        configs.append({
+            "zones": zones,
             "sources": sources,
             "client": HtdMcClient(host, port),
         })
