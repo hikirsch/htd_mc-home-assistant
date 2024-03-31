@@ -24,7 +24,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: v${{ steps.commit-info.outputs.version }}
+          name: v${{ steps.manifest-info.outputs.version }}
           tag_name: v${{ steps.manifest-info.outputs.version }}
           draft: true
           files: htd_mc.zip
