@@ -1,7 +1,12 @@
 {
-    "version": "1.0.0",
-    "domain": "htd_mc",
-    "name": "HTD MC Series",
-    "dependencies": [],
-    "requirements": []
+  "domain": "htd_mc",
+  "documentation": "https://www.github.com/hikirsch/htd_mc-home-assistant",
+  "issue_tracker": "https://www.github.com/hikirsch/htd_mc-home-assistant/issues",
+  "codeowners": ["@hikirsch"],
+  "name": "HTD MC Series",
+  "version": "1.1.0",
+  "iot_class": "cloud_polling",
+  "integration_type": "hub",
+  "dependencies": [],
+  "requirements": []
 }
