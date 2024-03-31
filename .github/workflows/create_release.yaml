@@ -1,21 +1,33 @@
-name: Create Release with Zipped Folder
+name: Create Release
 
 on:
   push:
     branches:
-      - main
-      - ask.hass-2024.1-enum-hacs
+      - '*'
 
 jobs:
   create_release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Get version
-        id: extract_version
+      - name: Get manifest.json info
+        id: manifest-info
         run: echo "::set-output name=version::$(jq -r '.version' custom_components/htd_mc/manifest.json)"
+
+      - name: Get commit info
+        id: commit-info
+        run: |
+          if [ "${{ github.ref }}" == "ref/heads/main" ]; then
+            echo "::set-output name=version::v${{steps.manifest-info.outputs.version}}"
+            echo "::set-output name=is-main::true"
+            echo "::set-output name=is-not-main::false"
+          else
+            echo "::set-output name=version::v${{steps.manifest-info.outputs.version}}-preview.${GITHUB_SHA::8}"
+            echo "::set-output name=is-main::false"
+            echo "::set-output name=is-notmain::true"
+          fi
 
       - name: Package
         run: zip -r htd_mc.zip custom_components/htd_mc
@@ -25,8 +37,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: v${{ steps.extract_version.outputs.version }}
-          tag_name: v${{ steps.extract_version.outputs.version }}          
+          name: v${{ steps.commit-info.outputs.version }}
+          tag_name: v${{ steps.commit-info.outputs.version }}          
           draft: true
-          generate_release_notes: false
+          prerelease: steps.commit-info.outputs.is-not-main
           files: htd_mc.zip
