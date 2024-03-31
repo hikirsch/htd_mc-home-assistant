@@ -20,11 +20,11 @@ jobs:
         id: commit-info
         run: |
           if [ "${{ github.ref }}" == "ref/heads/main" ]; then
-            echo "::set-output name=version::v${{steps.manifest-info.outputs.version}}"
+            echo "::set-output name=version::${{steps.manifest-info.outputs.version}}"
             echo "::set-output name=is-main::true"
             echo "::set-output name=is-not-main::false"
           else
-            echo "::set-output name=version::v${{steps.manifest-info.outputs.version}}-preview.${GITHUB_SHA::8}"
+            echo "::set-output name=version::${{steps.manifest-info.outputs.version}}-preview.${GITHUB_SHA::8}"
             echo "::set-output name=is-main::false"
             echo "::set-output name=is-notmain::true"
           fi
