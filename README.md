@@ -1,4 +1,4 @@
-# HTD MC/MCA-66 Series integration for Home Assistant
+# HTD MC/MCA-66 Series Integration for Home Assistant
 
 This integration will add the HTD MC/MCA-66 Whole House Audio into Home Assistant. This integration depends on 
 

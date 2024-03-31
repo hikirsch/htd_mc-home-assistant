@@ -1,4 +1,4 @@
-# HTD MC/MCA-66 Series integration for Home Assistant
+# HTD MC/MCA-66 Series Integration for Home Assistant
 
 [![GitHub Release][releases-shield]][releases]
 
