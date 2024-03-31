@@ -3,7 +3,7 @@
   "documentation": "https://www.github.com/hikirsch/htd_mc-home-assistant",
   "issue_tracker": "https://www.github.com/hikirsch/htd_mc-home-assistant/issues",
   "codeowners": ["@hikirsch"],
-  "name": "HTD MC Series",
+  "name": "HTD MC/MCA-66 Series",
   "version": "1.1.0",
   "iot_class": "cloud_polling",
   "integration_type": "hub",
