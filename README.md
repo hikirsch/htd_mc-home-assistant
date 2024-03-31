@@ -32,12 +32,7 @@ Easiest install is via [HACS](https://hacs.xyz/):
 3. Restart Home Assistant
 
 
-## ChangeLog
-- April 6, 2020 - Initial release
-- April 7, 2020 - Changed Icon and added unique_id (allows editing name and entity ID in Home Assistant UI)
-- April 8, 2020 - Support multiple MCAs
-- July 18, 2021 - Add version in manifest.json to support 2021.6+
-- March 31, 2024 - Upgrading to support HASS 2024.1.0. Adding support for HACS.
+
 
 ## Code Credits
 - https://github.com/whitingj/mca66

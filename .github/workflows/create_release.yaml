@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - ask.hass-2024.1-enum-hacs
 
 jobs:
   create_release:
@@ -12,34 +13,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Extract version from manifest.json
+      - name: Get version
         id: extract_version
         run: echo "::set-output name=version::$(jq -r '.version' custom_components/htd_mc/manifest.json)"
-        # Requires jq to be installed. Adjust the path to manifest.json if needed.
 
-      - name: Zip folder
+      - name: Package
         run: zip -r htd_mc.zip custom_components/htd_mc
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Release
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ steps.extract_version.outputs.version }}  # Use version from manifest.json
-          release_name: Release v${{ steps.extract_version.outputs.version }}  # Use version from manifest.json
-          body: |
-            Release with zipped folder.
-          draft: false
-          prerelease: false
-
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./htd_mc.zip
-          asset_name: htd_mc.zip
-          asset_content_type: application/zip
+          name: v${{ steps.extract_version.outputs.version }}
+          tag_name: v${{ steps.extract_version.outputs.version }}          
+          draft: true
+          prerelease: true
+          generate_release_notes: true
+          file: htd_mc.zip
