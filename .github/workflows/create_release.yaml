@@ -40,5 +40,5 @@ jobs:
           name: v${{ steps.commit-info.outputs.version }}
           tag_name: v${{ steps.commit-info.outputs.version }}          
           draft: true
-          prerelease: steps.commit-info.outputs.is-not-main
+          prerelease: ${{ steps.commit-info.outputs.is-not-main }}
           files: htd_mc.zip
