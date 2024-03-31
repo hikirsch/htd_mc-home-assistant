@@ -1,0 +1,7 @@
+{
+  "name": "HTD MC/MCA-66 Series integration for Home Assistant",
+  "filename": "htd_mc.zip",
+  "homeassistant": "2024.1.0",
+  "render_readme": false,
+  "zip_release": true
+}

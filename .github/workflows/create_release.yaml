@@ -1,0 +1,30 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get manifest.json info
+        id: manifest-info
+        run: echo "::set-output name=version::$(jq -r '.version' custom_components/htd_mc/manifest.json)"
+
+      - name: Package
+        run: zip -r htd_mc.zip custom_components/htd_mc
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: v${{ steps.commit-info.outputs.version }}
+          tag_name: v${{ steps.manifest-info.outputs.version }}
+          draft: true
+          files: htd_mc.zip
