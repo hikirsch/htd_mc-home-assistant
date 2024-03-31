@@ -28,6 +28,5 @@ jobs:
           name: v${{ steps.extract_version.outputs.version }}
           tag_name: v${{ steps.extract_version.outputs.version }}          
           draft: true
-          prerelease: true
-          generate_release_notes: true
-          file: htd_mc.zip
+          generate_release_notes: false
+          files: htd_mc.zip
