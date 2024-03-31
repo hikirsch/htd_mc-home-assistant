@@ -17,7 +17,7 @@ jobs:
         run: echo "::set-output name=version::$(jq -r '.version' custom_components/htd_mc/manifest.json)"
 
       - name: Package
-        run: zip -r htd_mc.zip custom_components/htd_mc
+        run: cd custom_components/htd_mc && zip -r ../../htd_mc.zip * && cd ../..
 
       - name: Release
         uses: softprops/action-gh-release@v2
