@@ -6,7 +6,7 @@ This integration will add the HTD MC/MCA-66 Whole House Audio into Home Assistan
 
 ### Via HACS (Home Assistant Community Store)
 
-Easiest install is via [HACS](https://hacs.xyz/):
+Easiest installation is via [HACS](https://hacs.xyz/):
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=hikirsch&repository=htd_mc-home-assistant&category=integration)
 
@@ -43,3 +43,4 @@ Update your configuration.yaml with at minimally the host.
 - https://github.com/whitingj/mca66
 - https://github.com/steve28/mca66
 - http://www.brandonclaps.com/?p=173
+- https://github.com/lounsbrough/htd-mca-66-api
