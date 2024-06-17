@@ -2,8 +2,8 @@ import logging
 import socket
 import time
 
-from constants import HtdConstants
-from htd_mc_client.utils import validate_zone, validate_source, calculate_checksum, parse_message
+from .constants import HtdConstants
+from .utils import validate_zone, validate_source, calculate_checksum, parse_message
 
 _LOGGER = logging.getLogger(__name__)
 

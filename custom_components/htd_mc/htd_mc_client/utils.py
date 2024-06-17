@@ -1,5 +1,5 @@
-from custom_components.htd_mc import HtdConstants
-from htd_mc_client.models import ZoneDetail
+from .constants import HtdConstants
+from .models import ZoneDetail
 
 
 # convert the volume into a usable value. the device will transmit a number between 196 - 255.

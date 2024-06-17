@@ -6,8 +6,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import discovery
 from homeassistant.helpers.typing import ConfigType
 
-from htd_mc_client.client import HtdMcClient
-from htd_mc_client.constants import HtdConstants
+from .htd_mc_client.client import HtdMcClient
+from .htd_mc_client.constants import HtdConstants
 
 
 DOMAIN = "htd_mc"
