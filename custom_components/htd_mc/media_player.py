@@ -12,7 +12,7 @@ from homeassistant.const import (
 )
 
 from custom_components.htd_mc import HtdConstants
-from htd_mc_client.models import ZoneDetail
+from .htd_mc_client.models import ZoneDetail
 from . import DOMAIN
 
 SUPPORT_HTD_MC = (
