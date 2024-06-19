@@ -3,6 +3,7 @@ import socket
 import time
 
 from .constants import HtdConstants
+from .models import ZoneDetail
 from .utils import validate_zone, validate_source, calculate_checksum, parse_message
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,44 +43,44 @@ class HtdMcClient:
         validate_source(source)
 
         # I have no idea why this is offset by 2
-        self.send_command(zone, HtdConstants.SET_COMMAND_CODE, source + 2)
+        return self.send_command(zone, HtdConstants.SET_COMMAND_CODE, source + 2)
 
     def volume_up(self, zone):
         validate_zone(zone)
-        self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.VOLUME_UP_COMMAND)
+        return self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.VOLUME_UP_COMMAND)
 
     def volume_down(self, zone):
         validate_zone(zone)
-        self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.VOLUME_DOWN_COMMAND)
+        return self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.VOLUME_DOWN_COMMAND)
 
-    def set_volume(self, zone, volume, on_update=None, on_complete=None, zone_info=None):
+    def set_volume(self, zone, volume, on_complete_action=None, zone_info=None):
         if zone_info is None:
             zone_info = self.query_zone(zone)
 
         diff = round(volume) - zone_info.volume
 
-        if on_update is not None:
-            on_update(volume, diff)
-
         if 1 >= diff >= -1:
-            return
+            return zone_info
 
         if diff < 0:
-            self.volume_down(zone)
+            zone_info = self.volume_down(zone)
         else:
-            self.volume_up(zone)
+            zone_info = self.volume_up(zone)
 
-        if on_complete is not None:
-            override_volume = on_complete(volume)
+        if zone_info is None:
+            zone_info = self.query_zone(zone)
+
+        if on_complete_action is not None:
+            override_volume = on_complete_action(volume, zone_info)
 
             if override_volume is not None:
                 volume = override_volume
 
-        self.set_volume(zone, volume, on_update, on_complete)
+        return self.set_volume(zone, volume, on_complete_action, zone_info)
 
     def toggle_mute(self, zone):
         validate_zone(zone)
-        self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.TOGGLE_MUTE_COMMAND)
+        return self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.TOGGLE_MUTE_COMMAND)
 
     def power_on(self, zone=None, all_zones=False):
         if all_zones:
@@ -88,7 +89,7 @@ class HtdMcClient:
         else:
             validate_zone(zone)
             power_command = HtdConstants.POWER_ON_ZONE_COMMAND
-        self.send_command(zone, HtdConstants.SET_COMMAND_CODE, power_command)
+        return self.send_command(zone, HtdConstants.SET_COMMAND_CODE, power_command)
 
     def power_off(self, zone=None, all_zones=False):
         if all_zones:
@@ -97,34 +98,37 @@ class HtdMcClient:
         else:
             validate_zone(zone)
             power_command = HtdConstants.POWER_OFF_ZONE_COMMAND
-        self.send_command(zone, HtdConstants.SET_COMMAND_CODE, power_command)
+        return self.send_command(zone, HtdConstants.SET_COMMAND_CODE, power_command)
 
     def bass_up(self, zone):
         validate_zone(zone)
-        self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.BASE_UP_COMMAND)
+        return self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.BASE_UP_COMMAND)
 
     def bass_down(self, zone):
         validate_zone(zone)
-        self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.BASE_DOWN_COMMAND)
+        return self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.BASE_DOWN_COMMAND)
 
     def treble_up(self, zone):
         validate_zone(zone)
-        self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.TREBLE_UP_COMMAND)
+        return self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.TREBLE_UP_COMMAND)
 
     def treble_down(self, zone):
         validate_zone(zone)
-        self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.TREBLE_DOWN_COMMAND)
+        return self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.TREBLE_DOWN_COMMAND)
 
     def balance_right(self, zone):
         validate_zone(zone)
-        self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.BALANCE_RIGHT_COMMAND)
+        return self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.BALANCE_RIGHT_COMMAND)
 
     def balance_left(self, zone):
         validate_zone(zone)
-        self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.BALANCE_LEFT_COMMAND)
+        return self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.BALANCE_LEFT_COMMAND)
 
-    def send_command(self, zone, command, data_code, attempt=0):
-        cmd = bytearray([HtdConstants.FIRST_DATA_BIT, HtdConstants.SECOND_DATA_BIT, zone, command, data_code])
+    def get_model_info(self):
+        return self.send_command(1, HtdConstants.MODEL_QUERY_COMMAND_CODE, 0)
+
+    def send_command(self, zone, command, data_code, attempt=0) -> ZoneDetail | str | None:
+        cmd = bytearray([HtdConstants.HEADER_BIT, HtdConstants.RESERVED_BYTE, zone, command, data_code])
         checksum = calculate_checksum(cmd)
         cmd.append(checksum)
 
@@ -134,14 +138,19 @@ class HtdMcClient:
         connection.send(cmd)
         data = connection.recv(MAX_BYTES_TO_RECEIVE)
         connection.close()
-
         time.sleep(self.command_delay_sec)
+
+        if command is HtdConstants.MODEL_QUERY_COMMAND_CODE:
+            return data.decode('utf-8')
 
         response = parse_message(zone, data)
 
         if response is None and attempt < self.retry_attempts:
             _LOGGER.warning('Bad response, will retry. zone = %d, retry = %d' % (zone, attempt))
-            time.sleep(self.command_delay_sec * (attempt + 1))  # sleep longer each time to be sure.
+            time.sleep((self.command_delay_sec * 2) * (attempt + 1))  # sleep longer each time to be sure.
             return self.send_command(zone, command, data_code, attempt + 1)
+
+        if response is None:
+            _LOGGER.critical('Still bad response after retrying! zone = %d! Consider increasing your command_delay!' % zone)
 
         return response

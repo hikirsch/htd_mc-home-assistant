@@ -11,6 +11,8 @@ from homeassistant.const import (
     STATE_UNKNOWN,
 )
 
+from custom_components.htd_mc import HtdConstants
+from htd_mc_client.models import ZoneDetail
 from . import DOMAIN
 
 SUPPORT_HTD_MC = (
@@ -43,15 +45,24 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 
 
 class HtdDevice(MediaPlayerEntity):
+    device_instance_id = None
+    client = None
+    sources = None
+    zone = None
+    changing_volume = None
+    zone_info = None
+
     def __init__(self, device_instance_id, client, sources, zone, zone_name):
-        self.changing_volume = None
-        self.zone_info = None
-        self.zone = zone
         self.device_instance_id = device_instance_id
-        self.zone_name = zone_name
-        self.sources = sources
         self.client = client
+        self.sources = sources
+        self.zone = zone
+        self.zone_name = zone_name
         self.update()
+
+    @property
+    def enabled(self) -> bool:
+        return self.zone_info is not None
 
     @property
     def supported_features(self):
@@ -72,7 +83,7 @@ class HtdDevice(MediaPlayerEntity):
 
     @property
     def state(self):
-        if self.zone_info is None or self.zone_info.power is None:
+        if self.zone_info.power is None:
             return STATE_UNKNOWN
         if self.zone_info.power:
             return STATE_ON
@@ -95,19 +106,21 @@ class HtdDevice(MediaPlayerEntity):
             self.changing_volume = new_volume * 100
             return
 
-        def on_update(desired, diff):
-            _LOGGER.info('updated zone = %d, desired = %f, diff = %f' % (self.zone, desired, diff))
+        def on_progress(desired: int, zone_info: ZoneDetail) -> int | None:
+            self.zone_info = zone_info
+            self.schedule_update_ha_state()
+            _LOGGER.info('updated zone = %d, desired = %f, current = %f' % (self.zone, desired, self.zone_info.volume))
 
-        def on_complete(desired: int) -> int | None:
             if desired != self.changing_volume:
-                _LOGGER.info("desired volume for zone %d has changed to %d" % (self.zone, self.changing_volume))
+                _LOGGER.info("a new volume for zone %d has been chosen, value = %d" % (self.zone, self.changing_volume))
                 return self.changing_volume
 
             return None
 
         self.changing_volume = new_volume * 100
-        self.client.set_volume(self.zone, self.changing_volume, on_update, on_complete)
+        self.client.set_volume(self.zone, self.changing_volume, on_progress)
         self.changing_volume = None
+        self.schedule_update_ha_state()
 
     @property
     def is_volume_muted(self):

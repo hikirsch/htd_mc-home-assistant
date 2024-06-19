@@ -42,7 +42,7 @@ def validate_zone(zone: int):
 # this will take a single message chunk of 14 bytes and parse this into a usable ZoneDetail model to read the state.
 # all credit for this new parser goes to lounsbrough
 def parse_zone(zone_data: bytes) -> ZoneDetail | None:
-    if zone_data[0] != HtdConstants.FIRST_DATA_BIT and zone_data[1] != HtdConstants.SECOND_DATA_BIT:
+    if zone_data[0] != HtdConstants.HEADER_BIT and zone_data[1] != HtdConstants.RESERVED_BYTE:
         return None
 
     # I think this is some kind of verification, it's been right everytime so far.

@@ -1,13 +1,13 @@
 class HtdConstants:
     # the first and second data bits are always this. whether we send or receive.
-    FIRST_DATA_BIT = 0x02
-    SECOND_DATA_BIT = 0x00
+    HEADER_BIT = 0x02
+    RESERVED_BYTE = 0x00
 
     # in order to not flood the device with commands, we have a delay inbetween commands, in milliseconds
     DEFAULT_COMMAND_DELAY = 100
 
-    # the device is flakey, let's retry a few times
-    DEFAULT_RETRY_ATTEMPTS = 3
+    # the device is flakey, let's retry a bunch of times
+    DEFAULT_RETRY_ATTEMPTS = 5
 
     # the port of the device, default is 10006
     DEFAULT_HTD_MC_PORT = 10006
@@ -28,6 +28,7 @@ class HtdConstants:
     # command codes instruct the device what mode to do, it's follow with a command as well listed below
     SET_COMMAND_CODE = 0x04
     QUERY_COMMAND_CODE = 0x06
+    MODEL_QUERY_COMMAND_CODE = 0x08
 
     # commands to be used for SET_COMMAND_CODE
     POWER_OFF_ZONE_COMMAND = 0x21
