@@ -52,7 +52,7 @@ class HtdMcClient:
         validate_zone(zone)
         self.send_command(zone, HtdConstants.SET_COMMAND_CODE, HtdConstants.VOLUME_DOWN_COMMAND)
 
-    def set_volume(self, zone, volume, on_update=None, zone_info=None):
+    def set_volume(self, zone, volume, on_update=None, on_complete=None, zone_info=None):
         if zone_info is None:
             zone_info = self.query_zone(zone)
 
@@ -69,7 +69,13 @@ class HtdMcClient:
         else:
             self.volume_up(zone)
 
-        self.set_volume(zone, volume, on_update)
+        if on_complete is not None:
+            override_volume = on_complete(volume)
+
+            if override_volume is not None:
+                volume = override_volume
+
+        self.set_volume(zone, volume, on_update, on_complete)
 
     def toggle_mute(self, zone):
         validate_zone(zone)
@@ -131,7 +137,7 @@ class HtdMcClient:
 
         time.sleep(self.command_delay_sec)
 
-        response = parse_message(data)
+        response = parse_message(zone, data)
 
         if response is None and attempt < self.retry_attempts:
             _LOGGER.warning('Bad response, will retry. zone = %d, retry = %d' % (zone, attempt))

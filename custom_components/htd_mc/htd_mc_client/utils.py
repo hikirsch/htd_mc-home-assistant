@@ -76,7 +76,7 @@ def parse_zone(zone_data: bytes) -> ZoneDetail | None:
 # the handler method to take the entire response from the controller and parse each zone. it was believed that the
 # controller can respond with multiple zones. in my testing this has never been the case. the device will always send
 # 28 bytes (2 chunks), the first chunk is always invalidated by some check, the second is zone info we requested. 
-def parse_message(data: bytes) -> ZoneDetail | None:
+def parse_message(zone: int, data: bytes) -> ZoneDetail | None:
     position = 0
     while position < len(data):
         # each chunk represents a different zone that should be 14 bytes long,
@@ -90,7 +90,7 @@ def parse_message(data: bytes) -> ZoneDetail | None:
         zone_info = parse_zone(zone_data)
 
         # if a valid zone was found, we're done
-        if zone_info is not None:
+        if zone_info is not None and zone_info.number == zone:
             return zone_info
 
     return None
