@@ -18,8 +18,18 @@ class ZoneDetail:
         return (
             "zone_number = %d, power = %s, mute = %s, mode = %s, party = %s, "
             "source = %d, volume = %d, htd_volume = %d, "
-            "treble = %d, bass = %d, balance = %d" % (
-                self.number, self.power, self.mute, self.mode, self.party,
-                self.source, self.volume, self.htd_volume,
-                self.treble, self.bass, self.balance
-            ))
+            "treble = %d, bass = %d, balance = %d" %
+            (
+                self.number,
+                self.power,
+                self.mute,
+                self.mode,
+                self.party,
+                self.source,
+                self.volume,
+                self.htd_volume,
+                self.treble,
+                self.bass,
+                self.balance,
+            )
+        )

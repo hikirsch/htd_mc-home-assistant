@@ -1,6 +1,7 @@
 # HTD MC/MCA-66 Series Integration for Home Assistant
 
-This integration will add the HTD MC/MCA-66 Whole House Audio into Home Assistant. This integration depends on 
+This integration will add the HTD MC/MCA-66 Whole House Audio into Home
+Assistant. This integration depends on
 
 ## Installation steps
 
@@ -13,10 +14,15 @@ Easiest installation is via [HACS](https://hacs.xyz/):
 `HACS -> Integrations -> Explore & Add Repositories -> HTD MC/MCA-66 Series`
 
 ### Manually
-Download the 4 files (`__init__.py`, `htd_mc.py`, `media_player.py`, `manifest.json`) from this repo and place them into your `custom_components/htd_mc` folder.
+
+Download the 4 files (`__init__.py`, `htd_mc.py`, `media_player.py`,
+`manifest.json`) from this repo and place them into your
+`custom_components/htd_mc` folder.
 
 ### Configure
+
 Update your configuration.yaml with at minimally the host.
+
  ```yaml
  htd_mc:
    - host: 192.168.1.123
@@ -30,16 +36,22 @@ Update your configuration.yaml with at minimally the host.
        - FM/AM
    - host: 192.168.xxx.xxx
 ```
+
 ### Configuration options
-   
-| Name    | Default Value | Description                                      |
-|---------|---------------|--------------------------------------------------|
-| host    | (none)        | IP address/host of the gateway                   |
-| port    | 10006         | Port number                                      |
-| zones   | Zone X        | A list of named zones                            |
-| sources | Source X      | A list of named sources                          |
+
+| Name                    | Default Value | Description                                                               |
+|-------------------------|---------------|---------------------------------------------------------------------------|
+| host                    | (none)        | IP address/host of the gateway                                            |
+| port                    | 10006         | Port number                                                               |
+| zones                   | Zone X        | A list of named zones                                                     |
+| sources                 | Source X      | A list of named sources                                                   |
+| update_volume_on_change | false         | Show tick updates on volume change                                        |
+| retry_attempts          | 5             | how many times to try and re-run the command if it fails                  |
+| socket_timeout          | 1             | How long, in seconds, the client should wait before timing out.           |
+| command_delay           | 100           | How long, in milliseconds, should the client throttle inbetween commands. |
 
 ## Code Credits
+
 - https://github.com/whitingj/mca66
 - https://github.com/steve28/mca66
 - http://www.brandonclaps.com/?p=173

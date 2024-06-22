@@ -1,9 +1,10 @@
 class HtdConstants:
-    # the first and second data bits are always this. whether we send or receive.
+    # the first and second bits are always this. whether we send or receive
     HEADER_BIT = 0x02
     RESERVED_BYTE = 0x00
 
-    # in order to not flood the device with commands, we have a delay inbetween commands, in milliseconds
+    # in order to not flood the device with commands, we have a delay
+    # inbetween commands, in milliseconds
     DEFAULT_COMMAND_DELAY = 100
 
     # the device is flakey, let's retry a bunch of times
@@ -25,7 +26,8 @@ class HtdConstants:
     # each message we get is chunked at 14 bytes
     MESSAGE_CHUNK_SIZE = 14
 
-    # command codes instruct the device what mode to do, it's follow with a command as well listed below
+    # command codes instruct the device what mode to do,
+    # it's follow with a command as well listed below
     SET_COMMAND_CODE = 0x04
     QUERY_COMMAND_CODE = 0x06
     MODEL_QUERY_COMMAND_CODE = 0x08
@@ -54,8 +56,9 @@ class HtdConstants:
     BASS_ZONE_DATA_INDEX = 11
     BALANCE_ZONE_DATA_INDEX = 12
 
-    # state toggles represent on and off values only. they are all stored within one byte. each binary digit is
-    # treated as a flag. these are indexes of each state toggle
+    # state toggles represent on and off values only. they are all stored
+    # within one byte. each binary digit is treated as a flag. these are
+    # indexes of each state toggle
     POWER_STATE_TOGGLE_INDEX = 0
     MUTE_STATE_TOGGLE_INDEX = 1
     MODE_STATE_TOGGLE_INDEX = 2
